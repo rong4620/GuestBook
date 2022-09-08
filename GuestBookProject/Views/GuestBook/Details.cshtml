@@ -1,5 +1,5 @@
 ﻿@model GuestBookProject.EntityModel.GuestBook
-
+@using GuestBookProject.Identity;
 @{
     var Replys = Model.Reply;
 }
@@ -29,10 +29,6 @@
             @Html.TextAreaFor(model => model.Message, new { cols = 1000, @rows = 5, @class = "form-control", @style = "resize:none", @readonly = true })
         </div>
     </div>
-    <p>
-        @Html.ActionLink("編輯", "Edit", new { id = Model.Id }) |
-        @Html.ActionLink("回到留言板", "Index")
-    </p>
     <table class="table">
         <thead>
             <tr>
@@ -64,11 +60,15 @@
             }
         </tbody>
     </table>
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#replyModal">
+    <button type="button" class="btn btn-success glyphicon glyphicon-plus" data-toggle="modal" data-target="#replyModal">
         新增回覆
     </button>
-</div>
 
+</div>
+<hr />
+<p>
+    @Html.ActionLink("回到留言板", "Index")
+</p>
 <!-- Modal -->
 <div class="modal fade" id="replyModal" tabindex="-1" role="dialog">
     <div class="modal-dialog " role="document">
@@ -81,7 +81,15 @@
                 <form id="ReplyForm">
                     <div class="form-group">
                         <label class="control-label">回覆者</label>
-                        <input type="text" class="form-control" name="ReplyUserName" id="textReplyUserName">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            var loginUserDispalyName = User.Identity.GetDisplayName();
+                            <input type="text" class="form-control" name="ReplyUserName" id="textReplyUserName" readonly value="@loginUserDispalyName">
+                        }
+                        else
+                        {
+                            <input type="text" class="form-control" name="ReplyUserName" id="textReplyUserName">
+                        }
                         <span class="errorMsg"></span>
                     </div>
                     <div class="form-group">
@@ -158,7 +166,7 @@
                 $('#replyModal').modal('hide');
                 var tmpl = $.templates("#replyTableBodyTmp");
                 var html = tmpl.render(data);
-                $("#replyTableBody").html(html);               
+                $("#replyTableBody").html(html);
             }
         );
     }

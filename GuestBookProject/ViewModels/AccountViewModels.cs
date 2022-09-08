@@ -55,10 +55,10 @@ namespace GuestBookProject.ViewModels
 
         [Required]
         [DataType(DataType.Password)]
-        [Display(Name = "Password")]
+        [Display(Name = "密碼")]
         public string Password { get; set; }
 
-        [Display(Name = "Remember me?")]
+        [Display(Name = "記住我?")]
         public bool RememberMe { get; set; }
     }
 

@@ -15,6 +15,7 @@
         <AssociationConnector Association="GuestBookProjectModel.FK_IdentityUserClaims_IdentityUsers_UserId" />
         <AssociationConnector Association="GuestBookProjectModel.FK_IdentityUserLogins_IdentityUsers_UserId" />
         <AssociationConnector Association="GuestBookProjectModel.IdentityUserRoles" />
+        <AssociationConnector Association="GuestBookProjectModel.GuestBook_FK" />
         </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

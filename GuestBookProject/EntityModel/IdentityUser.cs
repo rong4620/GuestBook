@@ -20,6 +20,7 @@ namespace GuestBookProject.EntityModel
             this.IdentityUserClaims = new HashSet<IdentityUserClaim>();
             this.IdentityUserLogins = new HashSet<IdentityUserLogin>();
             this.IdentityRoles = new HashSet<IdentityRole>();
+            this.GuestBooks = new HashSet<GuestBook>();
         }
     
         public int Id { get; set; }
@@ -42,5 +43,7 @@ namespace GuestBookProject.EntityModel
         public virtual ICollection<IdentityUserLogin> IdentityUserLogins { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<IdentityRole> IdentityRoles { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<GuestBook> GuestBooks { get; set; }
     }
 }

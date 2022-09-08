@@ -14,6 +14,7 @@
           <Property Name="Title" Type="text" Nullable="false" />
           <Property Name="Message" Type="text" Nullable="false" />
           <Property Name="CreateDateTime" Type="datetime" Nullable="false" />
+          <Property Name="UserId" Type="int" />
         </EntityType>
         <EntityType Name="IdentityRoles">
           <Key>
@@ -133,6 +134,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="GuestBook_FK">
+          <End Role="IdentityUsers" Type="Self.IdentityUsers" Multiplicity="0..1" />
+          <End Role="GuestBook" Type="Self.GuestBook" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="IdentityUsers">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="GuestBook">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="Reply_FK">
           <End Role="GuestBook" Type="Self.GuestBook" Multiplicity="1" />
           <End Role="Reply" Type="Self.Reply" Multiplicity="*" />
@@ -169,6 +182,10 @@
             <End Role="IdentityUsers" EntitySet="IdentityUsers" />
             <End Role="IdentityUserRoles" EntitySet="IdentityUserRoles" />
           </AssociationSet>
+          <AssociationSet Name="GuestBook_FK" Association="Self.GuestBook_FK">
+            <End Role="IdentityUsers" EntitySet="IdentityUsers" />
+            <End Role="GuestBook" EntitySet="GuestBook" />
+          </AssociationSet>
           <AssociationSet Name="Reply_FK" Association="Self.Reply_FK">
             <End Role="GuestBook" EntitySet="GuestBook" />
             <End Role="Reply" EntitySet="Reply" />
@@ -201,6 +218,10 @@
             <End Role="IdentityRole" EntitySet="IdentityRoles" />
             <End Role="IdentityUser" EntitySet="IdentityUsers" />
           </AssociationSet>
+          <AssociationSet Name="GuestBook_FK" Association="GuestBookProjectModel.GuestBook_FK">
+            <End Role="IdentityUser" EntitySet="IdentityUsers" />
+            <End Role="GuestBook" EntitySet="GuestBook" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="GuestBook">
           <Key>
@@ -212,6 +233,8 @@
           <Property Name="Message" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="CreateDateTime" Type="DateTime" Nullable="false" Precision="3" />
           <NavigationProperty Name="Reply" Relationship="GuestBookProjectModel.Reply_FK" FromRole="GuestBook" ToRole="Reply" />
+          <Property Name="UserId" Type="Int32" />
+          <NavigationProperty Name="IdentityUser" Relationship="GuestBookProjectModel.GuestBook_FK" FromRole="GuestBook" ToRole="IdentityUser" />
         </EntityType>
         <EntityType Name="Reply">
           <Key>
@@ -285,6 +308,7 @@
           <NavigationProperty Name="IdentityUserClaims" Relationship="GuestBookProjectModel.FK_IdentityUserClaims_IdentityUsers_UserId" FromRole="IdentityUser" ToRole="IdentityUserClaim" />
           <NavigationProperty Name="IdentityUserLogins" Relationship="GuestBookProjectModel.FK_IdentityUserLogins_IdentityUsers_UserId" FromRole="IdentityUser" ToRole="IdentityUserLogin" />
           <NavigationProperty Name="IdentityRoles" Relationship="GuestBookProjectModel.IdentityUserRoles" FromRole="IdentityUser" ToRole="IdentityRole" />
+          <NavigationProperty Name="GuestBooks" Relationship="GuestBookProjectModel.GuestBook_FK" FromRole="IdentityUser" ToRole="GuestBook" />
         </EntityType>
         <Association Name="FK_IdentityUserClaims_IdentityUsers_UserId">
           <End Type="GuestBookProjectModel.IdentityUser" Role="IdentityUser" Multiplicity="1">
@@ -318,6 +342,18 @@
           <End Type="GuestBookProjectModel.IdentityRole" Role="IdentityRole" Multiplicity="*" />
           <End Type="GuestBookProjectModel.IdentityUser" Role="IdentityUser" Multiplicity="*" />
         </Association>
+        <Association Name="GuestBook_FK">
+          <End Type="GuestBookProjectModel.IdentityUser" Role="IdentityUser" Multiplicity="0..1" />
+          <End Type="GuestBookProjectModel.GuestBook" Role="GuestBook" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="IdentityUser">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="GuestBook">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -327,6 +363,7 @@
           <EntitySetMapping Name="GuestBook">
             <EntityTypeMapping TypeName="GuestBookProjectModel.GuestBook">
               <MappingFragment StoreEntitySet="GuestBook">
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
                 <ScalarProperty Name="CreateDateTime" ColumnName="CreateDateTime" />
                 <ScalarProperty Name="Message" ColumnName="Message" />
                 <ScalarProperty Name="Title" ColumnName="Title" />

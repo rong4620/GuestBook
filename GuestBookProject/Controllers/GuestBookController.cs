@@ -7,6 +7,7 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using GuestBookProject.EntityModel;
+using Microsoft.AspNet.Identity;
 using Newtonsoft.JsonResult;
 using JsonResult = Newtonsoft.JsonResult.JsonResult;
 
@@ -53,6 +54,10 @@ namespace GuestBookProject.Controllers
             if (ModelState.IsValid)
             {
                 guestBook.CreateDateTime = DateTime.Now;
+
+                if (User.Identity.IsAuthenticated)
+                    guestBook.UserId = Convert.ToInt32(User.Identity.GetUserId());
+
                 db.GuestBook.Add(guestBook);
                 db.SaveChanges();
                 return RedirectToAction("Index");
