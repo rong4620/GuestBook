@@ -12,14 +12,18 @@ namespace GuestBookProject.EntityModel
     using System;
     using System.Collections.Generic;
     
-    public partial class Reply
+    public partial class IdentityRole
     {
-        public int Id { get; set; }
-        public string ReplyUserName { get; set; }
-        public string ReplyMessage { get; set; }
-        public System.DateTime CreateDateTime { get; set; }
-        public int GuestBookId { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public IdentityRole()
+        {
+            this.IdentityUsers = new HashSet<IdentityUser>();
+        }
     
-        public virtual GuestBook GuestBook { get; set; }
+        public int Id { get; set; }
+        public string Name { get; set; }
+    
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<IdentityUser> IdentityUsers { get; set; }
     }
 }

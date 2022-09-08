@@ -12,14 +12,12 @@ namespace GuestBookProject.EntityModel
     using System;
     using System.Collections.Generic;
     
-    public partial class Reply
+    public partial class IdentityUserLogin
     {
-        public int Id { get; set; }
-        public string ReplyUserName { get; set; }
-        public string ReplyMessage { get; set; }
-        public System.DateTime CreateDateTime { get; set; }
-        public int GuestBookId { get; set; }
+        public string LoginProvider { get; set; }
+        public string ProviderKey { get; set; }
+        public int UserId { get; set; }
     
-        public virtual GuestBook GuestBook { get; set; }
+        public virtual IdentityUser IdentityUser { get; set; }
     }
 }

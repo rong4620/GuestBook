@@ -7,11 +7,11 @@ using System.Web.Mvc;
 
 namespace GuestBookProject.Controllers
 {
-   
+
     public class HomeController : Controller
     {
 
-    
+
         public ActionResult Index()
         {
             using (var context = new GuestBookProjectContext())

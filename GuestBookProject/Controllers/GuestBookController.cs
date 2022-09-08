@@ -26,7 +26,7 @@ namespace GuestBookProject.Controllers
         public ActionResult Details(int? id)
         {
             if (id == null)
-            {
+            {                
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             GuestBook guestBook = db.GuestBook.Find(id);
