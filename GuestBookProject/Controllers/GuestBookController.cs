@@ -7,6 +7,8 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using GuestBookProject.EntityModel;
+using Newtonsoft.JsonResult;
+using JsonResult = Newtonsoft.JsonResult.JsonResult;
 
 namespace GuestBookProject.Controllers
 {
@@ -111,9 +113,23 @@ namespace GuestBookProject.Controllers
         public ActionResult DeleteConfirmed(int id)
         {
             GuestBook guestBook = db.GuestBook.Find(id);
+            db.Reply.RemoveRange(guestBook.Reply);
             db.GuestBook.Remove(guestBook);
             db.SaveChanges();
             return RedirectToAction("Index");
+        }
+
+
+        [HttpPost, ActionName("CreateReply")]
+        public JsonResult Replay(Reply reply)
+        {
+            var jsonResult = new JsonResult();
+            reply.CreateDateTime = DateTime.Now;
+            db.Reply.Add(reply);
+            db.SaveChanges();
+            jsonResult.Data = db.Reply.Where(x => x.GuestBookId == reply.GuestBookId).OrderBy(x => x.CreateDateTime).ToList()
+                                      .Select(x => new { ReplyUserName = x.ReplyUserName, ReplyMessage = x.ReplyMessage, CreateDateTime = x.CreateDateTime.ToString("yyyy/MM/dd HH:mm:ss") }).ToList();
+            return jsonResult;
         }
 
         protected override void Dispose(bool disposing)

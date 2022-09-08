@@ -11,22 +11,15 @@ namespace GuestBookProject.EntityModel
 {
     using System;
     using System.Collections.Generic;
-    
-    public partial class GuestBook
+
+    public partial class Reply
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public GuestBook()
-        {
-            this.Reply = new HashSet<Reply>();
-        }
-    
         public int Id { get; set; }
-        public string UserName { get; set; }
-        public string Title { get; set; }
-        public string Message { get; set; }
+        public string ReplyUserName { get; set; }
+        public string ReplyMessage { get; set; }
         public System.DateTime CreateDateTime { get; set; }
-    
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Reply> Reply { get; set; }
+        public int GuestBookId { get; set; }
+
+        public virtual GuestBook GuestBook { get; set; }
     }
 }

@@ -26,5 +26,6 @@ namespace GuestBookProject.EntityModel
         }
     
         public virtual DbSet<GuestBook> GuestBook { get; set; }
+        public virtual DbSet<Reply> Reply { get; set; }
     }
 }

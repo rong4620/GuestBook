@@ -15,8 +15,35 @@
           <Property Name="Message" Type="text" Nullable="false" />
           <Property Name="CreateDateTime" Type="datetime" Nullable="false" />
         </EntityType>
+        <EntityType Name="Reply">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ReplyUserName" Type="text" Nullable="false" />
+          <Property Name="ReplyMessage" Type="text" Nullable="false" />
+          <Property Name="CreateDateTime" Type="datetime" Nullable="false" />
+          <Property Name="GuestBookId" Type="int" Nullable="false" />
+        </EntityType>
+        <Association Name="Reply_FK">
+          <End Role="GuestBook" Type="Self.GuestBook" Multiplicity="1" />
+          <End Role="Reply" Type="Self.Reply" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GuestBook">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Reply">
+              <PropertyRef Name="GuestBookId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <EntityContainer Name="GuestBookProjectModelStoreContainer">
           <EntitySet Name="GuestBook" EntityType="Self.GuestBook" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Reply" EntityType="Self.Reply" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="Reply_FK" Association="Self.Reply_FK">
+            <End Role="GuestBook" EntitySet="GuestBook" />
+            <End Role="Reply" EntitySet="Reply" />
+          </AssociationSet>
         </EntityContainer>
       </Schema></edmx:StorageModels>
     <!-- CSDL content -->
@@ -24,6 +51,11 @@
       <Schema Namespace="GuestBookProjectModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
         <EntityContainer Name="GuestBookProjectContext" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="GuestBook" EntityType="GuestBookProjectModel.GuestBook" />
+          <EntitySet Name="Reply" EntityType="GuestBookProjectModel.Reply" />
+          <AssociationSet Name="Reply_FK" Association="GuestBookProjectModel.Reply_FK">
+            <End Role="GuestBook" EntitySet="GuestBook" />
+            <End Role="Reply" EntitySet="Reply" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="GuestBook">
           <Key>
@@ -34,7 +66,31 @@
           <Property Name="Title" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="Message" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="CreateDateTime" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="Reply" Relationship="GuestBookProjectModel.Reply_FK" FromRole="GuestBook" ToRole="Reply" />
         </EntityType>
+        <EntityType Name="Reply">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ReplyUserName" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="ReplyMessage" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="CreateDateTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="GuestBookId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="GuestBook" Relationship="GuestBookProjectModel.Reply_FK" FromRole="Reply" ToRole="GuestBook" />
+        </EntityType>
+        <Association Name="Reply_FK">
+          <End Type="GuestBookProjectModel.GuestBook" Role="GuestBook" Multiplicity="1" />
+          <End Type="GuestBookProjectModel.Reply" Role="Reply" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GuestBook">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Reply">
+              <PropertyRef Name="GuestBookId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -48,6 +104,17 @@
                 <ScalarProperty Name="Message" ColumnName="Message" />
                 <ScalarProperty Name="Title" ColumnName="Title" />
                 <ScalarProperty Name="UserName" ColumnName="UserName" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Reply">
+            <EntityTypeMapping TypeName="GuestBookProjectModel.Reply">
+              <MappingFragment StoreEntitySet="Reply">
+                <ScalarProperty Name="GuestBookId" ColumnName="GuestBookId" />
+                <ScalarProperty Name="CreateDateTime" ColumnName="CreateDateTime" />
+                <ScalarProperty Name="ReplyMessage" ColumnName="ReplyMessage" />
+                <ScalarProperty Name="ReplyUserName" ColumnName="ReplyUserName" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>

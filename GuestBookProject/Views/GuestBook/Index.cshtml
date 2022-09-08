@@ -1,13 +1,16 @@
 ﻿@model IEnumerable<GuestBookProject.EntityModel.GuestBook>
-
-@{
-    ViewBag.Title = "Index";
-}
-
-<h2>Index</h2>
+<style>
+    .td-ellipsis {
+        max-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+</style>
+<h2>留言板</h2>
 
 <p>
-    @Html.ActionLink("Create New", "Create")
+    <a href="@Url.Action("Create")" class="btn btn-primary">新增回覆</a>
 </p>
 <table class="table">
     <tr>
@@ -23,29 +26,37 @@
         <th>
             @Html.DisplayNameFor(model => model.CreateDateTime)
         </th>
-        <th></th>
+        <th>
+            回覆數量
+        </th>
+        <th>
+        </th>
     </tr>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.UserName)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.Title)
-        </td>
-        <td width="50%">
-            @Html.DisplayFor(modelItem => item.Message)
-        </td>
-        <td>
-            @item.CreateDateTime.ToString("yyyy/MM/dd HH:mm:ss")
-        </td>
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
-            @Html.ActionLink("Details", "Details", new { id=item.Id }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.Id })
-        </td>
-    </tr>
-}
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.UserName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+            <td width="50%" class="td-ellipsis">
+                @Html.DisplayFor(modelItem => item.Message)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreateDateTime)
+            </td>
+            <td style="text-align:center">
+                @Html.DisplayFor(modelItem => item.Reply.Count)
+            </td>
+            <td>
+                <a class="glyphicon glyphicon-pencil" style="margin-right:15px" href="/GuestBook/Edit/@item.Id" />
+                <a class="glyphicon glyphicon-comment" style="margin-right:15px" href="/GuestBook/Details/@item.Id" />
+                <a class="glyphicon glyphicon-trash" href="/GuestBook/Delete/@item.Id" />
+            </td>
+        </tr>
+    }
 
 </table>
