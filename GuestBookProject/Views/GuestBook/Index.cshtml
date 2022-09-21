@@ -12,6 +12,15 @@
 <p>
     <a href="@Url.Action("Create")" class="btn btn-success glyphicon glyphicon-plus"> 新增留言</a>
 </p>
+
+@using (Html.BeginForm())
+{
+    <p>
+        作者: @Html.DropDownList("SelectedUserName", "All")
+        <input type="submit" value="篩選" />
+    </p>
+}
+
 <table class="table">
     <tr>
         <th>

@@ -11,6 +11,7 @@ using Microsoft.AspNet.Identity;
 using Newtonsoft.JsonResult;
 using JsonResult = Newtonsoft.JsonResult.JsonResult;
 using GuestBookProject.Identity;
+using MoreLinq;
 
 namespace GuestBookProject.Controllers
 {
@@ -19,9 +20,24 @@ namespace GuestBookProject.Controllers
         private GuestBookProjectContext db = new GuestBookProjectContext();
 
         // GET: GuestBook
-        public ActionResult Index()
+        public ActionResult Index(string SelectedUserName)
         {
-            return View(db.GuestBook.ToList());
+            List<GuestBook> guestBooksList = null;
+
+            var guestBookUsers = db.GuestBook.DistinctBy(x=>x.UserName).Select(x => x.UserName).ToList();
+            ViewBag.SelectedUserName = new SelectList(guestBookUsers, SelectedUserName);
+
+            if (!string.IsNullOrEmpty(SelectedUserName))
+            {
+                IQueryable<GuestBook> courses = db.GuestBook
+                    .Where(c => c.UserName.Contains(SelectedUserName));
+
+                guestBooksList = courses.OrderByDescending(x => x.CreateDateTime).ToList();
+            }
+            else
+                guestBooksList = db.GuestBook.OrderByDescending(x=>x.CreateDateTime).ToList();
+
+            return View(guestBooksList);
         }
 
         // GET: GuestBook/Details/5
