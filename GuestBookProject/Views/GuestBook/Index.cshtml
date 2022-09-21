@@ -9,7 +9,6 @@
     }
 </style>
 <h2>留言板</h2>
-
 <p>
     <a href="@Url.Action("Create")" class="btn btn-success glyphicon glyphicon-plus"> 新增留言</a>
 </p>
@@ -53,8 +52,11 @@
                 @Html.DisplayFor(modelItem => item.Reply.Count)
             </td>
             <td>
-                @if (User.Identity.IsAuthenticated && item.UserId != null && item.UserId == Convert.ToInt32(User.Identity.GetUserId()))
-                {
+            
+
+                @if (User.Identity.IsAuthenticated && item.UserId != null && item.UserId == Convert.ToInt32(User.Identity.GetUserId()) || User.IsInRole("Admin"))
+                { 
+                  
                     <a class="glyphicon glyphicon-comment" style="margin-right:15px" href="/GuestBook/Details/@item.Id" />
                     <a class="glyphicon glyphicon-pencil" style="margin-right:15px" href="/GuestBook/Edit/@item.Id" />
                     <a class="glyphicon glyphicon-trash" href="/GuestBook/Delete/@item.Id" />

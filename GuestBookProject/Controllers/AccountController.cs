@@ -131,7 +131,7 @@ namespace GuestBookProject.Controllers
         public async Task<ActionResult> Register(RegisterViewModel model)
         {
             if (ModelState.IsValid)
-            {
+            {             
                 var user = new IdentityUser() { UserName = model.Email, Email = model.Email, DisplayName = model.DisplayName };
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)

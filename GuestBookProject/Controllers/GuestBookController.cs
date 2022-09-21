@@ -10,6 +10,7 @@ using GuestBookProject.EntityModel;
 using Microsoft.AspNet.Identity;
 using Newtonsoft.JsonResult;
 using JsonResult = Newtonsoft.JsonResult.JsonResult;
+using GuestBookProject.Identity;
 
 namespace GuestBookProject.Controllers
 {
@@ -56,7 +57,7 @@ namespace GuestBookProject.Controllers
                 guestBook.CreateDateTime = DateTime.Now;
 
                 if (User.Identity.IsAuthenticated)
-                    guestBook.UserId = Convert.ToInt32(User.Identity.GetUserId());
+                    guestBook.UserId = User.Identity.GetIntUserId();
 
                 db.GuestBook.Add(guestBook);
                 db.SaveChanges();
@@ -67,6 +68,7 @@ namespace GuestBookProject.Controllers
         }
 
         // GET: GuestBook/Edit/5
+        [Authorize]
         public ActionResult Edit(int? id)
         {
             if (id == null)
@@ -78,18 +80,32 @@ namespace GuestBookProject.Controllers
             {
                 return HttpNotFound();
             }
+            else if(guestBook.UserId != User.Identity.GetIntUserId() && !User.IsInRole("Admin"))
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            }
             return View(guestBook);
         }
 
         // POST: GuestBook/Edit/5
         // 若要免於大量指派 (overposting) 攻擊，請啟用您要繫結的特定屬性，
         // 如需詳細資料，請參閱 https://go.microsoft.com/fwlink/?LinkId=317598。
+        [Authorize]    
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,UserName,Title,Message,CreateDateTime")] GuestBook guestBook)
+        public ActionResult Edit([Bind(Include = "Id,UserName,Title,Message,CreateDateTime,UserId")] GuestBook guestBook)
         {
             if (ModelState.IsValid)
             {
+                if (guestBook == null)
+                {
+                    return HttpNotFound();
+                }
+                else if (guestBook.UserId != User.Identity.GetIntUserId() && !User.IsInRole("Admin"))
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+                }
+
                 db.Entry(guestBook).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
@@ -98,6 +114,7 @@ namespace GuestBookProject.Controllers
         }
 
         // GET: GuestBook/Delete/5
+        [Authorize]
         public ActionResult Delete(int? id)
         {
             if (id == null)
@@ -109,15 +126,30 @@ namespace GuestBookProject.Controllers
             {
                 return HttpNotFound();
             }
+            else if (guestBook.UserId != User.Identity.GetIntUserId() && !User.IsInRole("Admin"))
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            }
             return View(guestBook);
         }
 
         // POST: GuestBook/Delete/5
+        [Authorize]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
             GuestBook guestBook = db.GuestBook.Find(id);
+
+            if (guestBook == null)
+            {
+                return HttpNotFound();
+            }
+            else if (guestBook.UserId != User.Identity.GetIntUserId() && !User.IsInRole("Admin"))
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.Forbidden);
+            }
+
             db.Reply.RemoveRange(guestBook.Reply);
             db.GuestBook.Remove(guestBook);
             db.SaveChanges();

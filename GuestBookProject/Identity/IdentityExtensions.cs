@@ -15,5 +15,16 @@ namespace GuestBookProject.Identity
             // Test for null to avoid issues during local testing
             return (claim != null) ? claim.Value : string.Empty;
         }
+
+        public static int? GetIntUserId(this IIdentity identity)
+        {
+
+            
+            var claim = ((ClaimsIdentity)identity).FindFirst(ClaimTypes.NameIdentifier);
+            if (claim != null && claim.Value != null)
+                return Convert.ToInt32(claim.Value);
+            else
+                return null;
+        }
     }
 }
