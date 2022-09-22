@@ -15,6 +15,7 @@ using MoreLinq;
 using System.Data.SqlClient;
 using System.Configuration;
 using Dapper;
+using System.Threading.Tasks;
 
 namespace GuestBookProject.Controllers
 {
@@ -25,7 +26,7 @@ namespace GuestBookProject.Controllers
         private string strConnection = ConfigurationManager.ConnectionStrings["GuestBookProjectConnectionString"].ToString();
 
         // GET: GuestBook
-        public ActionResult Index(string SelectedUserName)
+        public async Task<ActionResult> Index(string SelectedUserName)
         {
             List<GuestBook> guestBooksList = null;
 
@@ -34,7 +35,7 @@ namespace GuestBookProject.Controllers
             {
                 string sql = @"SELECT distinct G.UserName FROM GuestBook G";
 
-                var guestBookUsers = conn.Query<string>(sql, null).ToList();
+                var guestBookUsers = (await conn.QueryAsync<string>(sql, null)).ToList();
                 ViewBag.SelectedUserName = new SelectList(guestBookUsers, SelectedUserName);
 
                 var parameters = new DynamicParameters();
@@ -50,7 +51,7 @@ namespace GuestBookProject.Controllers
                 }
 
                 var guestBookDictionary = new Dictionary<int, GuestBook>();
-                guestBooksList = conn.Query<GuestBook, Reply, GuestBook>(sql, (guestBook, reply) =>
+                guestBooksList = (await conn.QueryAsync<GuestBook, Reply, GuestBook>(sql, (guestBook, reply) =>
                 {
                     GuestBook guestBookEntry;
                     if (!guestBookDictionary.TryGetValue(guestBook.Id, out guestBookEntry))
@@ -65,54 +66,38 @@ namespace GuestBookProject.Controllers
                         guestBookEntry.Reply.Add(reply);
                     }
                     return guestBookEntry;
-                }, parameters).Distinct().OrderByDescending(x => x.CreateDateTime).ToList();
+                }, parameters)).Distinct().OrderByDescending(x => x.CreateDateTime).ToList();
             }
 
             // EF
-            //var guestBookUsers = db.GuestBook.DistinctBy(x => x.UserName).Select(x => x.UserName).ToList();
-            //ViewBag.SelectedUserName = new SelectList(guestBookUsers, SelectedUserName);
+            //var guestBookUsers = await db.GuestBook.Select(x => x.UserName).ToListAsync();
+            //var selectGuestBookUsers = guestBookUsers.DistinctBy(x => x);
+            //ViewBag.SelectedUserName = new SelectList(selectGuestBookUsers, SelectedUserName);
             //if (!string.IsNullOrEmpty(SelectedUserName))
             //{
             //    IQueryable<GuestBook> courses = db.GuestBook
             //        .Where(c => c.UserName.Contains(SelectedUserName));
 
-            //    guestBooksList = courses.OrderByDescending(x => x.CreateDateTime).ToList();
+            //    guestBooksList = await courses.OrderByDescending(x => x.CreateDateTime).ToListAsync();
             //}
             //else
-            //    guestBooksList = db.GuestBook.OrderByDescending(x => x.CreateDateTime).ToList();
+            //    guestBooksList = await db.GuestBook.OrderByDescending(x => x.CreateDateTime).ToListAsync();
 
             return View(guestBooksList);
         }
 
         // GET: GuestBook/Details/5
-        public ActionResult Details(int? id)
+        public async Task<ActionResult> Details(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
+
+            //EF
             //GuestBook guestBook = db.GuestBook.Find(id);
 
-            GuestBook guestBook = null;
-
-            using (SqlConnection conn = new SqlConnection(strConnection))
-            {
-
-                var parameters = new DynamicParameters();
-                parameters.Add("Id", id);
-
-                var sql = @"SELECT G.* , 
-                            R.Id as Reply_Id ,
-                            R.ReplyUserName as Reply_ReplyUserName ,
-                            R.ReplyMessage as Reply_ReplyMessage ,
-                            R.CreateDateTime as Reply_CreateDateTime 
-                            FROM GuestBook G 
-                            JOIN Reply R on G.Id = R.GuestBookId
-                            WHERE G.Id = @Id";
-
-                var dy = conn.Query<dynamic>(sql, parameters);
-                guestBook = Slapper.AutoMapper.MapDynamic<GuestBook>(dy, false).FirstOrDefault();
-            }
+            GuestBook guestBook = await findGuestBookByIdAsync(id);
 
             if (guestBook == null)
             {
@@ -132,7 +117,7 @@ namespace GuestBookProject.Controllers
         // 如需詳細資料，請參閱 https://go.microsoft.com/fwlink/?LinkId=317598。
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "UserName,Title,Message")] GuestBook guestBook)
+        public async Task<ActionResult> Create([Bind(Include = "UserName,Title,Message")] GuestBook guestBook)
         {
             if (ModelState.IsValid)
             {
@@ -145,7 +130,7 @@ namespace GuestBookProject.Controllers
                 using (SqlConnection conn = new SqlConnection(strConnection))
                 {
                     string sql = "INSERT INTO GuestBook VALUES (@UserName,@Title,@Message,@CreateDateTime,@UserId);";
-                    conn.Execute(sql, guestBook);
+                    await conn.ExecuteAsync(sql, guestBook);
                 }
 
 
@@ -160,13 +145,17 @@ namespace GuestBookProject.Controllers
 
         // GET: GuestBook/Edit/5
         [Authorize]
-        public ActionResult Edit(int? id)
+        public async Task<ActionResult> Edit(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            GuestBook guestBook = db.GuestBook.Find(id);
+            //EF
+            //GuestBook guestBook = db.GuestBook.Find(id);
+
+            GuestBook guestBook = await findGuestBookByIdAsync(id);
+
             if (guestBook == null)
             {
                 return HttpNotFound();
@@ -184,7 +173,7 @@ namespace GuestBookProject.Controllers
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "Id,UserName,Title,Message,CreateDateTime,UserId")] GuestBook guestBook)
+        public async Task<ActionResult> Edit([Bind(Include = "Id,UserName,Title,Message,CreateDateTime,UserId")] GuestBook guestBook)
         {
             if (ModelState.IsValid)
             {
@@ -207,7 +196,7 @@ namespace GuestBookProject.Controllers
                                    CreateDateTime = @CreateDateTime,
                                    UserId = @UserId
                                    WHERE Id=@Id";
-                    conn.Execute(sql, guestBook);
+                    await conn.ExecuteAsync(sql, guestBook);
                 }
 
 
@@ -221,13 +210,18 @@ namespace GuestBookProject.Controllers
 
         // GET: GuestBook/Delete/5
         [Authorize]
-        public ActionResult Delete(int? id)
+        public async Task<ActionResult> Delete(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            GuestBook guestBook = db.GuestBook.Find(id);
+
+            //EF
+            //GuestBook guestBook = db.GuestBook.Find(id);
+
+            GuestBook guestBook = await findGuestBookByIdAsync(id);
+
             if (guestBook == null)
             {
                 return HttpNotFound();
@@ -243,9 +237,12 @@ namespace GuestBookProject.Controllers
         [Authorize]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteConfirmed(int id)
+        public async Task<ActionResult> DeleteConfirmed(int id)
         {
-            GuestBook guestBook = db.GuestBook.Find(id);
+            //EF
+            //GuestBook guestBook = db.GuestBook.Find(id);
+
+            GuestBook guestBook = await findGuestBookByIdAsync(id);
 
             if (guestBook == null)
             {
@@ -260,7 +257,7 @@ namespace GuestBookProject.Controllers
             {
                 string strSql = @"DELETE Reply WHERE GuestBookId = @Id;
                                   DELETE GuestBook WHERE Id = @Id";
-                conn.Execute(strSql, guestBook);
+                await conn.ExecuteAsync(strSql, guestBook);
             }
 
             //EF
@@ -272,15 +269,53 @@ namespace GuestBookProject.Controllers
 
 
         [HttpPost, ActionName("CreateReply")]
-        public JsonResult Replay(Reply reply)
+        public async Task<JsonResult> CreateReplayAsync(Reply reply)
         {
             var jsonResult = new JsonResult();
             reply.CreateDateTime = DateTime.Now;
-            db.Reply.Add(reply);
-            db.SaveChanges();
-            jsonResult.Data = db.Reply.Where(x => x.GuestBookId == reply.GuestBookId).OrderBy(x => x.CreateDateTime).ToList()
-                                      .Select(x => new { ReplyUserName = x.ReplyUserName, ReplyMessage = x.ReplyMessage, CreateDateTime = x.CreateDateTime.ToString("yyyy/MM/dd HH:mm:ss") }).ToList();
+
+            //Dapper
+            using (SqlConnection conn = new SqlConnection(strConnection))
+            {
+                string sql = "INSERT INTO Reply VALUES (@ReplyUserName,@ReplyMessage,@CreateDateTime,@GuestBookId);";
+                await conn.ExecuteAsync(sql, reply);
+
+                sql = "SELECT * FROM Reply WHERE Reply.GuestBookId = @GuestBookId;";
+                jsonResult.Data = (await conn.QueryAsync<Reply>(sql, new { GuestBookId = reply.GuestBookId }))
+                                  .Select(x => new { ReplyUserName = x.ReplyUserName, ReplyMessage = x.ReplyMessage, CreateDateTime = x.CreateDateTime.ToString("yyyy/MM/dd HH:mm:ss") }).ToList();
+            }
+
+            //EF
+            //db.Reply.Add(reply);
+            //db.SaveChanges();
+            //jsonResult.Data = (await db.Reply.Where(x => x.GuestBookId == reply.GuestBookId).OrderBy(x => x.CreateDateTime).ToListAsync())
+            //                          .Select(x => new { ReplyUserName = x.ReplyUserName, ReplyMessage = x.ReplyMessage, CreateDateTime = x.CreateDateTime.ToString("yyyy/MM/dd HH:mm:ss") }).ToList();
             return jsonResult;
+        }
+
+        private async Task<GuestBook> findGuestBookByIdAsync(int? id)
+        {
+            GuestBook result = null;
+
+            using (SqlConnection conn = new SqlConnection(strConnection))
+            {
+                var parameters = new DynamicParameters();
+                parameters.Add("Id", id);
+
+                var sql = @"SELECT G.* , 
+                            R.Id as Reply_Id ,
+                            R.ReplyUserName as Reply_ReplyUserName ,
+                            R.ReplyMessage as Reply_ReplyMessage ,
+                            R.CreateDateTime as Reply_CreateDateTime 
+                            FROM GuestBook G 
+                            LEFT JOIN Reply R on G.Id = R.GuestBookId
+                            WHERE G.Id = @Id";
+
+                var dy = await conn.QueryAsync<dynamic>(sql, parameters);
+                result = Slapper.AutoMapper.MapDynamic<GuestBook>(dy, false).FirstOrDefault();
+            }
+
+            return result;
         }
 
         protected override void Dispose(bool disposing)

@@ -29,9 +29,11 @@ namespace GuestBookProject.EntityModel
         public class GuestBookMetadata
         {
             [Required]
+            [StringLength(100)]
             [DisplayName("留言者")]
             public string UserName { get; set; }
             [Required]
+            [StringLength(100)]
             [DisplayName("主題")]
             public string Title { get; set; }
             [Required]
