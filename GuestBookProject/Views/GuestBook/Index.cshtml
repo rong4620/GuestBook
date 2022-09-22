@@ -15,9 +15,10 @@
 
 @using (Html.BeginForm())
 {
+
     <p>
-        作者: @Html.DropDownList("SelectedUserName", "All")
-        <input type="submit" value="篩選" />
+        作者: @Html.TextBox("searchString", ViewBag.CurrentFilter as string)
+        <button type="submit" class="btn btn-primary glyphicon glyphicon-search"></button>
     </p>
 }
 
@@ -33,10 +34,27 @@
             @Html.DisplayNameFor(model => model.Message)
         </th>
         <th>
-            @Html.DisplayNameFor(model => model.CreateDateTime)
+            @Html.ActionLink("建立日期", "Index", new { sortOrder = ViewBag.DateSortParm, currentFilter = ViewBag.CurrentFilter })
+            @if (string.IsNullOrEmpty(ViewBag.CurrentSort))
+            {
+                <span class="glyphicon glyphicon-sort-by-attributes-alt"></span>
+            }
+            else if (ViewBag.CurrentSort == "Date")
+            {
+
+                <span class="glyphicon glyphicon-sort-by-attributes"></span>
+            }
         </th>
         <th>
-            回覆數量
+            @Html.ActionLink("回覆數量", "Index", new { sortOrder = ViewBag.ReplyCountSortParm, currentFilter = ViewBag.CurrentFilter })
+            @if (ViewBag.CurrentSort == "ReplyCount_Desc")
+            {
+                <span class="glyphicon glyphicon-sort-by-attributes-alt"></span>
+            }
+            else if (ViewBag.CurrentSort == "ReplyCount")
+            {
+                <span class="glyphicon glyphicon-sort-by-attributes"></span>
+            }
         </th>
         <th>
         </th>
@@ -61,11 +79,11 @@
                 @Html.DisplayFor(modelItem => item.Reply.Count)
             </td>
             <td>
-            
+
 
                 @if (User.Identity.IsAuthenticated && item.UserId != null && item.UserId == Convert.ToInt32(User.Identity.GetUserId()) || User.IsInRole("Admin"))
-                { 
-                  
+                {
+
                     <a class="glyphicon glyphicon-comment" style="margin-right:15px" href="/GuestBook/Details/@item.Id" />
                     <a class="glyphicon glyphicon-pencil" style="margin-right:15px" href="/GuestBook/Edit/@item.Id" />
                     <a class="glyphicon glyphicon-trash" href="/GuestBook/Delete/@item.Id" />
