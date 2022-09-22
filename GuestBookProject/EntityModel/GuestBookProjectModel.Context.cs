@@ -25,11 +25,11 @@ namespace GuestBookProject.EntityModel
             throw new UnintentionalCodeFirstException();
         }
     
-        public virtual DbSet<GuestBook> GuestBook { get; set; }
         public virtual DbSet<Reply> Reply { get; set; }
         public virtual DbSet<IdentityRole> IdentityRoles { get; set; }
         public virtual DbSet<IdentityUserClaim> IdentityUserClaims { get; set; }
         public virtual DbSet<IdentityUserLogin> IdentityUserLogins { get; set; }
         public virtual DbSet<IdentityUser> IdentityUsers { get; set; }
+        public virtual DbSet<GuestBook> GuestBook { get; set; }
     }
 }

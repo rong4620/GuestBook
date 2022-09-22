@@ -5,9 +5,7 @@
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
       <Diagram DiagramId="2882ad030b364585b79d2bf39fc31f8a" Name="Diagram1">
-        <EntityTypeShape EntityType="GuestBookProjectModel.GuestBook" Width="1.5" PointX="0.75" PointY="0.75" />
         <EntityTypeShape EntityType="GuestBookProjectModel.Reply" Width="1.5" PointX="3" PointY="0.75" />
-        <AssociationConnector Association="GuestBookProjectModel.Reply_FK" />
         <EntityTypeShape EntityType="GuestBookProjectModel.IdentityRole" Width="1.5" PointX="0.75" PointY="5.5" />
         <EntityTypeShape EntityType="GuestBookProjectModel.IdentityUserClaim" Width="1.5" PointX="5.25" PointY="4" />
         <EntityTypeShape EntityType="GuestBookProjectModel.IdentityUserLogin" Width="1.5" PointX="5.25" PointY="6.75" />
@@ -15,7 +13,9 @@
         <AssociationConnector Association="GuestBookProjectModel.FK_IdentityUserClaims_IdentityUsers_UserId" />
         <AssociationConnector Association="GuestBookProjectModel.FK_IdentityUserLogins_IdentityUsers_UserId" />
         <AssociationConnector Association="GuestBookProjectModel.IdentityUserRoles" />
+        <EntityTypeShape EntityType="GuestBookProjectModel.GuestBook" Width="1.5" PointX="5.25" PointY="10.125" />
         <AssociationConnector Association="GuestBookProjectModel.GuestBook_FK" />
+        <AssociationConnector Association="GuestBookProjectModel.Reply_FK" />
         </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

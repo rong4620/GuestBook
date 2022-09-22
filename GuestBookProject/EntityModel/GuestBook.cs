@@ -27,8 +27,8 @@ namespace GuestBookProject.EntityModel
         public System.DateTime CreateDateTime { get; set; }
         public Nullable<int> UserId { get; set; }
     
+        public virtual IdentityUser IdentityUsers { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Reply> Reply { get; set; }
-        public virtual IdentityUser IdentityUser { get; set; }
     }
 }

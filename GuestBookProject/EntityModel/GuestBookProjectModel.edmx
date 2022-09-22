@@ -10,8 +10,8 @@
             <PropertyRef Name="Id" />
           </Key>
           <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="UserName" Type="text" Nullable="false" />
-          <Property Name="Title" Type="text" Nullable="false" />
+          <Property Name="UserName" Type="nvarchar" MaxLength="100" />
+          <Property Name="Title" Type="nvarchar" MaxLength="100" Nullable="false" />
           <Property Name="Message" Type="text" Nullable="false" />
           <Property Name="CreateDateTime" Type="datetime" Nullable="false" />
           <Property Name="UserId" Type="int" />
@@ -196,12 +196,7 @@
     <edmx:ConceptualModels>
       <Schema Namespace="GuestBookProjectModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
         <EntityContainer Name="GuestBookProjectContext" annotation:LazyLoadingEnabled="true">
-          <EntitySet Name="GuestBook" EntityType="GuestBookProjectModel.GuestBook" />
           <EntitySet Name="Reply" EntityType="GuestBookProjectModel.Reply" />
-          <AssociationSet Name="Reply_FK" Association="GuestBookProjectModel.Reply_FK">
-            <End Role="GuestBook" EntitySet="GuestBook" />
-            <End Role="Reply" EntitySet="Reply" />
-          </AssociationSet>
           <EntitySet Name="IdentityRoles" EntityType="GuestBookProjectModel.IdentityRole" />
           <EntitySet Name="IdentityUserClaims" EntityType="GuestBookProjectModel.IdentityUserClaim" />
           <EntitySet Name="IdentityUserLogins" EntityType="GuestBookProjectModel.IdentityUserLogin" />
@@ -218,24 +213,16 @@
             <End Role="IdentityRole" EntitySet="IdentityRoles" />
             <End Role="IdentityUser" EntitySet="IdentityUsers" />
           </AssociationSet>
+          <EntitySet Name="GuestBook" EntityType="GuestBookProjectModel.GuestBook" />
           <AssociationSet Name="GuestBook_FK" Association="GuestBookProjectModel.GuestBook_FK">
             <End Role="IdentityUser" EntitySet="IdentityUsers" />
             <End Role="GuestBook" EntitySet="GuestBook" />
           </AssociationSet>
+          <AssociationSet Name="Reply_FK" Association="GuestBookProjectModel.Reply_FK">
+            <End Role="GuestBook" EntitySet="GuestBook" />
+            <End Role="Reply" EntitySet="Reply" />
+          </AssociationSet>
         </EntityContainer>
-        <EntityType Name="GuestBook">
-          <Key>
-            <PropertyRef Name="Id" />
-          </Key>
-          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="UserName" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="Title" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="Message" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
-          <Property Name="CreateDateTime" Type="DateTime" Nullable="false" Precision="3" />
-          <NavigationProperty Name="Reply" Relationship="GuestBookProjectModel.Reply_FK" FromRole="GuestBook" ToRole="Reply" />
-          <Property Name="UserId" Type="Int32" />
-          <NavigationProperty Name="IdentityUser" Relationship="GuestBookProjectModel.GuestBook_FK" FromRole="GuestBook" ToRole="IdentityUser" />
-        </EntityType>
         <EntityType Name="Reply">
           <Key>
             <PropertyRef Name="Id" />
@@ -247,18 +234,6 @@
           <Property Name="GuestBookId" Type="Int32" Nullable="false" />
           <NavigationProperty Name="GuestBook" Relationship="GuestBookProjectModel.Reply_FK" FromRole="Reply" ToRole="GuestBook" />
         </EntityType>
-        <Association Name="Reply_FK">
-          <End Type="GuestBookProjectModel.GuestBook" Role="GuestBook" Multiplicity="1" />
-          <End Type="GuestBookProjectModel.Reply" Role="Reply" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="GuestBook">
-              <PropertyRef Name="Id" />
-            </Principal>
-            <Dependent Role="Reply">
-              <PropertyRef Name="GuestBookId" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <EntityType Name="IdentityRole">
           <Key>
             <PropertyRef Name="Id" />
@@ -308,7 +283,7 @@
           <NavigationProperty Name="IdentityUserClaims" Relationship="GuestBookProjectModel.FK_IdentityUserClaims_IdentityUsers_UserId" FromRole="IdentityUser" ToRole="IdentityUserClaim" />
           <NavigationProperty Name="IdentityUserLogins" Relationship="GuestBookProjectModel.FK_IdentityUserLogins_IdentityUsers_UserId" FromRole="IdentityUser" ToRole="IdentityUserLogin" />
           <NavigationProperty Name="IdentityRoles" Relationship="GuestBookProjectModel.IdentityUserRoles" FromRole="IdentityUser" ToRole="IdentityRole" />
-          <NavigationProperty Name="GuestBooks" Relationship="GuestBookProjectModel.GuestBook_FK" FromRole="IdentityUser" ToRole="GuestBook" />
+          <NavigationProperty Name="GuestBook" Relationship="GuestBookProjectModel.GuestBook_FK" FromRole="IdentityUser" ToRole="GuestBook" />
         </EntityType>
         <Association Name="FK_IdentityUserClaims_IdentityUsers_UserId">
           <End Type="GuestBookProjectModel.IdentityUser" Role="IdentityUser" Multiplicity="1">
@@ -342,6 +317,19 @@
           <End Type="GuestBookProjectModel.IdentityRole" Role="IdentityRole" Multiplicity="*" />
           <End Type="GuestBookProjectModel.IdentityUser" Role="IdentityUser" Multiplicity="*" />
         </Association>
+        <EntityType Name="GuestBook">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserName" Type="String" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Title" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="Message" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="CreateDateTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="UserId" Type="Int32" />
+          <NavigationProperty Name="IdentityUsers" Relationship="GuestBookProjectModel.GuestBook_FK" FromRole="GuestBook" ToRole="IdentityUser" />
+          <NavigationProperty Name="Reply" Relationship="GuestBookProjectModel.Reply_FK" FromRole="GuestBook" ToRole="Reply" />
+        </EntityType>
         <Association Name="GuestBook_FK">
           <End Type="GuestBookProjectModel.IdentityUser" Role="IdentityUser" Multiplicity="0..1" />
           <End Type="GuestBookProjectModel.GuestBook" Role="GuestBook" Multiplicity="*" />
@@ -354,24 +342,24 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="Reply_FK">
+          <End Type="GuestBookProjectModel.GuestBook" Role="GuestBook" Multiplicity="1" />
+          <End Type="GuestBookProjectModel.Reply" Role="Reply" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="GuestBook">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Reply">
+              <PropertyRef Name="GuestBookId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="GuestBookProjectModelStoreContainer" CdmEntityContainer="GuestBookProjectContext">
-          <EntitySetMapping Name="GuestBook">
-            <EntityTypeMapping TypeName="GuestBookProjectModel.GuestBook">
-              <MappingFragment StoreEntitySet="GuestBook">
-                <ScalarProperty Name="UserId" ColumnName="UserId" />
-                <ScalarProperty Name="CreateDateTime" ColumnName="CreateDateTime" />
-                <ScalarProperty Name="Message" ColumnName="Message" />
-                <ScalarProperty Name="Title" ColumnName="Title" />
-                <ScalarProperty Name="UserName" ColumnName="UserName" />
-                <ScalarProperty Name="Id" ColumnName="Id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="Reply">
             <EntityTypeMapping TypeName="GuestBookProjectModel.Reply">
               <MappingFragment StoreEntitySet="Reply">
@@ -437,6 +425,18 @@
               <ScalarProperty Name="Id" ColumnName="RoleId" />
             </EndProperty>
           </AssociationSetMapping>
+          <EntitySetMapping Name="GuestBook">
+            <EntityTypeMapping TypeName="GuestBookProjectModel.GuestBook">
+              <MappingFragment StoreEntitySet="GuestBook">
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="CreateDateTime" ColumnName="CreateDateTime" />
+                <ScalarProperty Name="Message" ColumnName="Message" />
+                <ScalarProperty Name="Title" ColumnName="Title" />
+                <ScalarProperty Name="UserName" ColumnName="UserName" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>
@@ -451,7 +451,7 @@
     <Options>
       <DesignerInfoPropertySet>
         <DesignerProperty Name="ValidateOnBuild" Value="true" />
-        <DesignerProperty Name="EnablePluralization" Value="True" />
+        <DesignerProperty Name="EnablePluralization" Value="False" />
         <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
         <DesignerProperty Name="UseLegacyProvider" Value="false" />
         <DesignerProperty Name="CodeGenerationStrategy" Value="無" />
