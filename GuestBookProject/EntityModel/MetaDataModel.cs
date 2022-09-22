@@ -26,6 +26,7 @@ namespace GuestBookProject.EntityModel
     [MetadataType(typeof(GuestBookMetadata))]
     public partial class GuestBook
     {
+        public int ReplyCount { get; set; }
         public class GuestBookMetadata
         {
             [Required]

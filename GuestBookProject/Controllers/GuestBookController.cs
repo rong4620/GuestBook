@@ -16,6 +16,7 @@ using System.Data.SqlClient;
 using System.Configuration;
 using Dapper;
 using System.Threading.Tasks;
+using X.PagedList;
 
 namespace GuestBookProject.Controllers
 {
@@ -26,71 +27,73 @@ namespace GuestBookProject.Controllers
         private string strConnection = ConfigurationManager.ConnectionStrings["GuestBookProjectConnectionString"].ToString();
 
         // GET: GuestBook
-        public async Task<ActionResult> Index(string currentFilter, string searchString, string sortOrder)
+        public async Task<ActionResult> Index(string currentFilter, string searchString, string sortOrder, int? page)
         {
-            List<GuestBook> guestBooksList = null;
+           
 
             ViewBag.CurrentSort = sortOrder;
-            ViewBag.ReplyCountSortParm = sortOrder == "ReplyCount" ? "ReplyCount_Desc" : "ReplyCount";         
+            ViewBag.ReplyCountSortParm = sortOrder == "ReplyCount" ? "ReplyCount_Desc" : "ReplyCount";
             ViewBag.DateSortParm = String.IsNullOrEmpty(sortOrder) ? "Date" : "";
 
-            if (searchString == null)
+            if (searchString != null)
+            {
+                page = 1;
+            }
+            else
+            {
                 searchString = currentFilter;
+            }
 
             ViewBag.CurrentFilter = searchString;
 
-            //Dapper
+            IEnumerable<GuestBook> queryReslut = null;
+         
             using (SqlConnection conn = new SqlConnection(strConnection))
             {
+                var parameters = new DynamicParameters();             
 
-                var parameters = new DynamicParameters();
-
-                string sql = @"SELECT * FROM GuestBook G 
-                               LEFT JOIN Reply R on G.Id = R.GuestBookId
-                               WHERE 1=1";
+                string sql = @"SELECT  t1.* , t2.ReplyCount FROM
+                                (SELECT G.* from GuestBook G) as t1
+                                JOIN
+                                (SELECT G.Id ,COUNT(DISTINCT R.Id) ReplyCount FROM GuestBook G 
+                                LEFT JOIN Reply R on G.Id = R.GuestBookId
+                                GROUP BY G.Id)  as t2
+                                ON t1.Id = t2.Id
+                                WHERE 1=1";
 
                 if (!string.IsNullOrEmpty(searchString))
-                {
-                    sql += " AND G.UserName LIKE  @UserName";
+                {                    
+                    sql += " AND t1.UserName LIKE  @UserName";
                     parameters.Add("UserName", "%" + searchString + "%");
                 }
 
                 var guestBookDictionary = new Dictionary<int, GuestBook>();
-                var query = (await conn.QueryAsync<GuestBook, Reply, GuestBook>(sql, (guestBook, reply) =>
-                {
-                    GuestBook guestBookEntry;
-                    if (!guestBookDictionary.TryGetValue(guestBook.Id, out guestBookEntry))
-                    {
-                        guestBookEntry = guestBook;
-                        guestBookEntry.Reply = new List<Reply>();
-                        guestBookDictionary.Add(guestBook.Id, guestBook);
-                    }
-
-                    if (reply != null)
-                    {
-                        guestBookEntry.Reply.Add(reply);
-                    }
-                    return guestBookEntry;
-                }, parameters)).Distinct();
+                var query = (await conn.QueryAsync<GuestBook>(sql, parameters));
 
                 switch (sortOrder)
                 {
                     case "ReplyCount":
-                        guestBooksList = query.OrderBy(x => x.Reply.Count).ThenByDescending(x => x.CreateDateTime).ToList();
+                        queryReslut = query.OrderBy(x => x.ReplyCount).ThenByDescending(x => x.CreateDateTime);
                         break;
                     case "ReplyCount_Desc":
-                        guestBooksList = query.OrderByDescending(x => x.Reply.Count).ThenByDescending(x=>x.CreateDateTime).ToList();
+                        queryReslut = query.OrderByDescending(x => x.ReplyCount).ThenByDescending(x => x.CreateDateTime);
                         break;
                     case "Date":
-                        guestBooksList = query.OrderBy(x => x.CreateDateTime).ToList();
+                        queryReslut = query.OrderBy(x => x.CreateDateTime);
                         break;
                     default:
-                        guestBooksList = query.OrderByDescending(x => x.CreateDateTime).ToList();
+                        queryReslut = query.OrderByDescending(x => x.CreateDateTime);
                         break;
                 }
             }
 
-            return View(guestBooksList);
+
+
+            int pageSize = 5;
+            int pageNumber = page ?? 1;
+
+            return View(queryReslut.ToPagedList(pageNumber, pageSize));
+
         }
 
         // GET: GuestBook/Details/5
@@ -290,6 +293,61 @@ namespace GuestBookProject.Controllers
 
                 var dy = await conn.QueryAsync<dynamic>(sql, parameters);
                 result = Slapper.AutoMapper.MapDynamic<GuestBook>(dy, false).FirstOrDefault();
+            }
+
+            return result;
+        }
+
+        private async Task<IEnumerable<GuestBook>> GetGuestBooksWithReplyAsync(string searchString, string sortOrder)
+        {          
+            IEnumerable<GuestBook> result = null;
+            using (SqlConnection conn = new SqlConnection(strConnection))
+            {
+                var parameters = new DynamicParameters();
+
+                string sql = @"SELECT * FROM GuestBook G 
+                               LEFT JOIN Reply R on G.Id = R.GuestBookId
+                               WHERE 1=1";
+
+                if (!string.IsNullOrEmpty(searchString))
+                {
+                    sql += " AND G.UserName LIKE  @UserName";                   
+                    parameters.Add("UserName", "%" + searchString + "%");
+                }
+
+                var guestBookDictionary = new Dictionary<int, GuestBook>();
+                var query = (await conn.QueryAsync<GuestBook, Reply, GuestBook>(sql, (guestBook, reply) =>
+                {
+                    GuestBook guestBookEntry;
+                    if (!guestBookDictionary.TryGetValue(guestBook.Id, out guestBookEntry))
+                    {
+                        guestBookEntry = guestBook;
+                        guestBookEntry.Reply = new List<Reply>();
+                        guestBookDictionary.Add(guestBook.Id, guestBook);
+                    }
+
+                    if (reply != null)
+                    {
+                        guestBookEntry.Reply.Add(reply);
+                    }
+                    return guestBookEntry;
+                }, parameters)).Distinct();
+
+                switch (sortOrder)
+                {
+                    case "ReplyCount":
+                        result = query.OrderBy(x => x.Reply.Count).ThenByDescending(x => x.CreateDateTime);
+                        break;
+                    case "ReplyCount_Desc":
+                        result = query.OrderByDescending(x => x.Reply.Count).ThenByDescending(x => x.CreateDateTime);
+                        break;
+                    case "Date":
+                        result = query.OrderBy(x => x.CreateDateTime);
+                        break;
+                    default:
+                        result = query.OrderByDescending(x => x.CreateDateTime);
+                        break;
+                }
             }
 
             return result;

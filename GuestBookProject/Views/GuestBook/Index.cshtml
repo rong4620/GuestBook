@@ -1,5 +1,10 @@
 ﻿@model IEnumerable<GuestBookProject.EntityModel.GuestBook>
+@using X.PagedList;
+@using X.PagedList.Mvc;
 @using Microsoft.AspNet.Identity;
+@{
+    var PageList = (IPagedList)Model;
+}
 <style>
     .td-ellipsis {
         max-width: 100px;
@@ -76,7 +81,7 @@
                 @Html.DisplayFor(modelItem => item.CreateDateTime)
             </td>
             <td style="text-align:center">
-                @Html.DisplayFor(modelItem => item.Reply.Count)
+                @Html.DisplayFor(modelItem => item.ReplyCount)
             </td>
             <td>
 
@@ -95,5 +100,9 @@
             </td>
         </tr>
     }
-
 </table>
+
+Page @(PageList.PageCount < PageList.PageNumber ? 0 : PageList.PageNumber) of @PageList.PageCount
+
+@Html.PagedListPager(PageList, page => Url.Action("Index",
+    new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))
