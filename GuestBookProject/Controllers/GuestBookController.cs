@@ -6,9 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Web;
 using System.Web.Mvc;
-using GuestBookProject.EntityModel;
-using Microsoft.AspNet.Identity;
-using Newtonsoft.JsonResult;
+//using GuestBookProject.EntityModel;
 using JsonResult = Newtonsoft.JsonResult.JsonResult;
 using GuestBookProject.Identity;
 using MoreLinq;
@@ -17,13 +15,14 @@ using System.Configuration;
 using Dapper;
 using System.Threading.Tasks;
 using X.PagedList;
-
+using GuestBookModel.Model;
+using Dapper.Contrib.Extensions;
 
 namespace GuestBookProject.Controllers
 {
     public class GuestBookController : Controller
     {
-        private GuestBookProjectContext db = new GuestBookProjectContext();
+        //private GuestBookProjectContext db = new GuestBookProjectContext();
 
         private string strConnection = ConfigurationManager.ConnectionStrings["GuestBookProjectConnectionString"].ToString();
 
@@ -195,14 +194,16 @@ namespace GuestBookProject.Controllers
 
                 using (SqlConnection conn = new SqlConnection(strConnection))
                 {
-                    string sql = @"UPDATE GuestBook SET 
-                                   UserName = @UserName,
-                                   Title = @Title,
-                                   Message = @Message,
-                                   CreateDateTime = @CreateDateTime,
-                                   UserId = @UserId
-                                   WHERE Id=@Id";
-                    await conn.ExecuteAsync(sql, guestBook);
+                    //string sql = @"UPDATE GuestBook SET 
+                    //               UserName = @UserName,
+                    //               Title = @Title,
+                    //               Message = @Message,
+                    //               CreateDateTime = @CreateDateTime,
+                    //               UserId = @UserId
+                    //               WHERE Id=@Id";
+                    //await conn.ExecuteAsync(sql, guestBook);
+
+                    await conn.UpdateAsync<GuestBook>(guestBook);
                 }
 
                 return RedirectToAction("Index");
@@ -360,13 +361,13 @@ namespace GuestBookProject.Controllers
             return result;
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                db.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+        //protected override void Dispose(bool disposing)
+        //{
+        //    if (disposing)
+        //    {
+        //        db.Dispose();
+        //    }
+        //    base.Dispose(disposing);
+        //}
     }
 }
