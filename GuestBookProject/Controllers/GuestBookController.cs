@@ -110,7 +110,7 @@ namespace GuestBookProject.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            GuestBook guestBook = await findGuestBookByIdAsync(id);
+            GuestBook guestBook = await findGuestBookWithReplyByIdAsync(id);
 
             if (guestBook == null)
             {
@@ -141,8 +141,11 @@ namespace GuestBookProject.Controllers
 
                 using (SqlConnection conn = new SqlConnection(strConnection))
                 {
-                    string sql = "INSERT INTO GuestBook VALUES (@UserName,@Title,@Message,@CreateDateTime,@UserId);";
-                    await conn.ExecuteAsync(sql, guestBook);
+                    //string sql = "INSERT INTO GuestBook VALUES (@UserName,@Title,@Message,@CreateDateTime,@UserId);";
+                    //await conn.ExecuteAsync(sql, guestBook);
+
+                    //Dapper Contrib
+                    await conn.InsertAsync<GuestBook>(guestBook);
                 }
 
                 return RedirectToAction("Index");
@@ -160,7 +163,7 @@ namespace GuestBookProject.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            GuestBook guestBook = await findGuestBookByIdAsync(id);
+            GuestBook guestBook = await findGuestBookWithReplyByIdAsync(id);
 
             if (guestBook == null)
             {
@@ -203,6 +206,7 @@ namespace GuestBookProject.Controllers
                     //               WHERE Id=@Id";
                     //await conn.ExecuteAsync(sql, guestBook);
 
+                    //Dapper Contrib
                     await conn.UpdateAsync<GuestBook>(guestBook);
                 }
 
@@ -220,7 +224,7 @@ namespace GuestBookProject.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            GuestBook guestBook = await findGuestBookByIdAsync(id);
+            GuestBook guestBook = await findGuestBookWithReplyByIdAsync(id);
 
             if (guestBook == null)
             {
@@ -240,7 +244,7 @@ namespace GuestBookProject.Controllers
         public async Task<ActionResult> DeleteConfirmed(int id)
         {
 
-            GuestBook guestBook = await findGuestBookByIdAsync(id);
+            GuestBook guestBook = await findGuestBookWithReplyByIdAsync(id);
 
             if (guestBook == null)
             {
@@ -270,18 +274,21 @@ namespace GuestBookProject.Controllers
 
             using (SqlConnection conn = new SqlConnection(strConnection))
             {
-                string sql = "INSERT INTO Reply VALUES (@ReplyUserName,@ReplyMessage,@CreateDateTime,@GuestBookId);";
-                await conn.ExecuteAsync(sql, reply);
+                //string sql = "INSERT INTO Reply VALUES (@ReplyUserName,@ReplyMessage,@CreateDateTime,@GuestBookId);";
+                //await conn.ExecuteAsync(sql, reply);
 
-                sql = "SELECT * FROM Reply WHERE Reply.GuestBookId = @GuestBookId;";
-                jsonResult.Data = (await conn.QueryAsync<Reply>(sql, new { GuestBookId = reply.GuestBookId }))
+                //Dapper Contrib
+                await conn.InsertAsync<Reply>(reply);
+
+                string querySql = "SELECT * FROM Reply WHERE Reply.GuestBookId = @GuestBookId;";
+                jsonResult.Data = (await conn.QueryAsync<Reply>(querySql, new { GuestBookId = reply.GuestBookId }))
                                   .Select(x => new { ReplyUserName = x.ReplyUserName, ReplyMessage = x.ReplyMessage, CreateDateTime = x.CreateDateTime.ToString("yyyy/MM/dd HH:mm:ss") }).ToList();
             }
 
             return jsonResult;
         }
 
-        private async Task<GuestBook> findGuestBookByIdAsync(int? id)
+        private async Task<GuestBook> findGuestBookWithReplyByIdAsync(int? id)
         {
             GuestBook result = null;
 
@@ -306,7 +313,7 @@ namespace GuestBookProject.Controllers
             return result;
         }
 
-        private async Task<IEnumerable<GuestBook>> GetGuestBooksWithReplyAsync(string searchString, string sortOrder)
+        private async Task<IEnumerable<GuestBook>> getGuestBooksWithReplyAsync(string searchString, string sortOrder)
         {
             IEnumerable<GuestBook> result = null;
             using (SqlConnection conn = new SqlConnection(strConnection))
