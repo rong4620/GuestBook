@@ -22,7 +22,7 @@ namespace GuestBookProject.Controllers
 {
     public class GuestBookController : Controller
     {
-        //private GuestBookProjectContext db = new GuestBookProjectContext();
+        private GuestBookProjectContext db = new GuestBookProjectContext();
 
         private string strConnection = ConfigurationManager.ConnectionStrings["GuestBookProjectConnectionString"].ToString();
 
@@ -163,7 +163,13 @@ namespace GuestBookProject.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            GuestBook guestBook = await findGuestBookWithReplyByIdAsync(id);
+            GuestBook guestBook = null;
+
+            using (SqlConnection conn = new SqlConnection(strConnection))
+            {
+                //Dapper Contrib
+                guestBook = await conn.GetAsync<GuestBook>(id);
+            }
 
             if (guestBook == null)
             {
@@ -224,7 +230,13 @@ namespace GuestBookProject.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            GuestBook guestBook = await findGuestBookWithReplyByIdAsync(id);
+            GuestBook guestBook = null;
+
+            using (SqlConnection conn = new SqlConnection(strConnection))
+            {
+                //Dapper Contrib
+                guestBook = await conn.GetAsync<GuestBook>(id);
+            }
 
             if (guestBook == null)
             {
@@ -244,7 +256,13 @@ namespace GuestBookProject.Controllers
         public async Task<ActionResult> DeleteConfirmed(int id)
         {
 
-            GuestBook guestBook = await findGuestBookWithReplyByIdAsync(id);
+            GuestBook guestBook = null;
+
+            using (SqlConnection conn = new SqlConnection(strConnection))
+            {
+                //Dapper Contrib
+                guestBook = await conn.GetAsync<GuestBook>(id);
+            }
 
             if (guestBook == null)
             {
