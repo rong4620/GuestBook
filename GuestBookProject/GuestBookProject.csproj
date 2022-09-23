@@ -272,6 +272,7 @@
     <Content Include="EntityModel\GuestBookProjectModel.edmx.diagram">
       <DependentUpon>GuestBookProjectModel.edmx</DependentUpon>
     </Content>
+    <Content Include="App_Data\GuestBookProject.bak" />
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.4.1.js" />
     <Content Include="Scripts\jquery-3.4.1.min.js" />
@@ -325,7 +326,6 @@
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="App_Data\" />
     <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>

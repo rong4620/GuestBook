@@ -18,6 +18,7 @@ using Dapper;
 using System.Threading.Tasks;
 using X.PagedList;
 
+
 namespace GuestBookProject.Controllers
 {
     public class GuestBookController : Controller
@@ -27,13 +28,22 @@ namespace GuestBookProject.Controllers
         private string strConnection = ConfigurationManager.ConnectionStrings["GuestBookProjectConnectionString"].ToString();
 
         // GET: GuestBook
-        public async Task<ActionResult> Index(string currentFilter, string searchString, string sortOrder, int? page)
+        public async Task<ActionResult> Index(string currentFilter, string searchString, string sortOrder, int? page, int pageSize = 5)
         {
-           
 
+            ViewBag.CurrentPageSize = pageSize;
             ViewBag.CurrentSort = sortOrder;
             ViewBag.ReplyCountSortParm = sortOrder == "ReplyCount" ? "ReplyCount_Desc" : "ReplyCount";
             ViewBag.DateSortParm = String.IsNullOrEmpty(sortOrder) ? "Date" : "";
+
+            ViewBag.PageSize = new List<SelectListItem>()
+            {                
+                new SelectListItem() { Value="5", Text= "5" },
+                new SelectListItem() { Value="10", Text= "10" },
+                new SelectListItem() { Value="15", Text= "15" },
+                new SelectListItem() { Value="25", Text= "25" },
+                new SelectListItem() { Value="50", Text= "50" },
+             };
 
             if (searchString != null)
             {
@@ -47,10 +57,10 @@ namespace GuestBookProject.Controllers
             ViewBag.CurrentFilter = searchString;
 
             IEnumerable<GuestBook> queryReslut = null;
-         
+
             using (SqlConnection conn = new SqlConnection(strConnection))
             {
-                var parameters = new DynamicParameters();             
+                var parameters = new DynamicParameters();
 
                 string sql = @"SELECT  t1.* , t2.ReplyCount FROM
                                 (SELECT G.* from GuestBook G) as t1
@@ -62,7 +72,7 @@ namespace GuestBookProject.Controllers
                                 WHERE 1=1";
 
                 if (!string.IsNullOrEmpty(searchString))
-                {                    
+                {
                     sql += " AND t1.UserName LIKE  @UserName";
                     parameters.Add("UserName", "%" + searchString + "%");
                 }
@@ -87,9 +97,6 @@ namespace GuestBookProject.Controllers
                 }
             }
 
-
-
-            int pageSize = 5;
             int pageNumber = page ?? 1;
 
             return View(queryReslut.ToPagedList(pageNumber, pageSize));
@@ -299,7 +306,7 @@ namespace GuestBookProject.Controllers
         }
 
         private async Task<IEnumerable<GuestBook>> GetGuestBooksWithReplyAsync(string searchString, string sortOrder)
-        {          
+        {
             IEnumerable<GuestBook> result = null;
             using (SqlConnection conn = new SqlConnection(strConnection))
             {
@@ -311,7 +318,7 @@ namespace GuestBookProject.Controllers
 
                 if (!string.IsNullOrEmpty(searchString))
                 {
-                    sql += " AND G.UserName LIKE  @UserName";                   
+                    sql += " AND G.UserName LIKE  @UserName";
                     parameters.Add("UserName", "%" + searchString + "%");
                 }
 

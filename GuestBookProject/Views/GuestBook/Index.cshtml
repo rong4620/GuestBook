@@ -1,6 +1,7 @@
 ﻿@model IEnumerable<GuestBookProject.EntityModel.GuestBook>
 @using X.PagedList;
 @using X.PagedList.Mvc;
+@using X.PagedList.Mvc.Common;
 @using Microsoft.AspNet.Identity;
 @{
     var PageList = (IPagedList)Model;
@@ -12,6 +13,11 @@
         text-overflow: ellipsis;
         white-space: nowrap;
     }
+
+    .custom-form-control {
+        display: inline-block;
+        width: auto;
+    }
 </style>
 <h2>留言板</h2>
 <p>
@@ -22,8 +28,9 @@
 {
 
     <p>
-        作者: @Html.TextBox("searchString", ViewBag.CurrentFilter as string)
-        <button type="submit" class="btn btn-primary glyphicon glyphicon-search"></button>
+        作者: @Html.TextBox("searchString", ViewBag.CurrentFilter as string, htmlAttributes: new { @class = "form-control custom-form-control" })
+        每頁顯示筆數: @Html.DropDownList("PageSize", null, ViewBag.CurrentPageSize as string, htmlAttributes: new { @class = "form-control custom-form-control" })
+        <button type="submit" class="btn btn-primary glyphicon glyphicon-search" style="margin-bottom:5px"></button>
     </p>
 }
 
@@ -39,7 +46,7 @@
             @Html.DisplayNameFor(model => model.Message)
         </th>
         <th>
-            @Html.ActionLink("建立日期", "Index", new { sortOrder = ViewBag.DateSortParm, currentFilter = ViewBag.CurrentFilter })
+            @Html.ActionLink("建立日期", "Index", new { sortOrder = ViewBag.DateSortParm, currentFilter = ViewBag.CurrentFilter, pageSize = ViewBag.CurrentPageSize })
             @if (string.IsNullOrEmpty(ViewBag.CurrentSort))
             {
                 <span class="glyphicon glyphicon-sort-by-attributes-alt"></span>
@@ -51,7 +58,7 @@
             }
         </th>
         <th>
-            @Html.ActionLink("回覆數量", "Index", new { sortOrder = ViewBag.ReplyCountSortParm, currentFilter = ViewBag.CurrentFilter })
+            @Html.ActionLink("回覆數", "Index", new { sortOrder = ViewBag.ReplyCountSortParm, currentFilter = ViewBag.CurrentFilter, pageSize = ViewBag.CurrentPageSize })
             @if (ViewBag.CurrentSort == "ReplyCount_Desc")
             {
                 <span class="glyphicon glyphicon-sort-by-attributes-alt"></span>
@@ -103,6 +110,5 @@
 </table>
 
 Page @(PageList.PageCount < PageList.PageNumber ? 0 : PageList.PageNumber) of @PageList.PageCount
-
 @Html.PagedListPager(PageList, page => Url.Action("Index",
-    new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))
+    new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter, pageSize = ViewBag.CurrentPageSize }), PagedListRenderOptions.ClassicPlusFirstAndLast)
