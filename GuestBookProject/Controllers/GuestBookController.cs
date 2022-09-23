@@ -22,7 +22,7 @@ namespace GuestBookProject.Controllers
 {
     public class GuestBookController : Controller
     {
-        private GuestBookProjectContext db = new GuestBookProjectContext();
+        //private GuestBookProjectContext db = new GuestBookProjectContext();
 
         private string strConnection = ConfigurationManager.ConnectionStrings["GuestBookProjectConnectionString"].ToString();
 
